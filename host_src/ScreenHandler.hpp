@@ -23,6 +23,19 @@ static int leftAlign(int margin, int panelWidth, int contentWidth) {
     return margin;
 }
 
+static int align(int margin, int panelWidth, int contentWidth, AlignMode mode) {
+    switch (mode) {
+    case LEFT:
+        return leftAlign(margin, panelWidth, contentWidth);
+    case CENTER:
+        return centre(margin, panelWidth, contentWidth);
+    case RIGHT:
+        return rightAlign(margin, panelWidth, contentWidth);
+    default:
+        return leftAlign(margin, panelWidth, contentWidth);
+    }
+}
+
 enum AlignMode {
     LEFT,
     CENTER,
@@ -43,7 +56,7 @@ struct listPanel {
 
     std::string title;
     AlignMode titleAlign;
-	bool titleInverted;
+    TitleStyle titleStyle;
 
     std::vector<std::string> items;
     AlignMode itemsAlign;
@@ -122,43 +135,30 @@ public:
 
     void renderPanel(const listPanel& panel) {
         // Draw title
-        int titleX;
-        switch (panel.titleAlign) {
-        case LEFT:
-            titleX = leftAlign(panel.startX, panel.width, panel.title.length());
-            break;
-        case CENTER:
-            titleX = centre(panel.startX, panel.width, panel.title.length());
-            break;
-        case RIGHT:
-            titleX = rightAlign(panel.startX, panel.width, panel.title.length());
-            break;
-        }
+		int titleX = align(panel.startX, panel.width, panel.title.length(), panel.titleAlign);
 
-        if (panel.titleInverted) {
+        // Draw spaces before title
+        if (panel.titleStyle == INVERTED || panel.titleStyle == HOLE) {
             invCol();
+            for (int i = panel.startX; i < panel.startX + panel.width; i++) {
+                std::cout << " ";
+			}
+
+            if (panel.titleStyle == HOLE) {
+                unCol();
+			}
 		}
-        
-		// Draw spaces before title
 
         moveCursor(titleX, panel.startY);
         std::cout << panel.title;
+        unCol();
+
         // Draw items
         for (size_t i = 0; i < panel.items.size() && i < static_cast<size_t>(panel.height - 1); i++) {
-            int itemX;
-            switch (panel.itemsAlign) {
-            case LEFT:
-                itemX = leftAlign(panel.startX, panel.width, panel.itemsPrefix.length() + panel.items[i].length());
-                break;
-            case CENTER:
-                itemX = centre(panel.startX, panel.width, panel.itemsPrefix.length() + panel.items[i].length());
-                break;
-            case RIGHT:
-                itemX = rightAlign(panel.startX, panel.width, panel.itemsPrefix.length() + panel.items[i].length());
-                break;
-            }
+			int itemX = align(panel.startX, panel.width, panel.itemsPrefix.length() + panel.items[i].length(), panel.itemsAlign);
             moveCursor(itemX, panel.startY + 1 + i);
             std::cout << panel.itemsPrefix << panel.items[i];
+
             // If there is a right-aligned item
             if (!panel.items_right.empty() && i < panel.items_right.size()) {
                 int rightItemX = rightAlign(panel.startX, panel.width, panel.items_right[i].length());
