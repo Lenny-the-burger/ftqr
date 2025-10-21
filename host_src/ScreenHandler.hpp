@@ -11,6 +11,12 @@
 #include <unistd.h>
 #endif
 
+enum AlignMode {
+    LEFT,
+    CENTER,
+    RIGHT
+};
+
 static int centre(int margin, int panelWidth, int contentWidth) {
     return margin + (panelWidth - contentWidth) / 2;
 }
@@ -35,12 +41,6 @@ static int align(int margin, int panelWidth, int contentWidth, AlignMode mode) {
         return leftAlign(margin, panelWidth, contentWidth);
     }
 }
-
-enum AlignMode {
-    LEFT,
-    CENTER,
-    RIGHT
-};
 
 enum TitleStyle {
 	NORMAL, // white on black
