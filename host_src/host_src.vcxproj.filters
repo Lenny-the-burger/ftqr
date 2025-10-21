@@ -26,7 +26,7 @@
     <ClInclude Include="qrcodegen.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScreenHandler.hpp">
+    <ClInclude Include="screenstuff.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

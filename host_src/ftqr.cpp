@@ -1,5 +1,5 @@
 ﻿#include "qrcodegen.hpp"
-#include "ScreenHandler.hpp"
+#include "screenstuff.hpp"
 
 #include <iostream>
 #include <string> 
