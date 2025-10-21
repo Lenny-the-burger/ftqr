@@ -147,7 +147,7 @@ int main() {
 	sh.moveCursor(statusPanelStartX, statusPanelStartY + 2);
 	cout << filesTitle;
 
-	int fileListPaneHeight = min( max(5, fileList.size()) , 10);
+	int fileListPaneHeight = min( max(5, (int)fileList.size()) , 10);
 	int filesListPaneStartY = statusPanelStartY + 3;
 
 	// list files
