@@ -64,6 +64,17 @@ struct listPanel {
 
     // Note that you may only have items_right if itemsAlign is LEFT
     std::vector<std::string> items_right;
+
+	// how wide is right pane (left items get truncated)
+
+    // give right panel items exactly n characters
+    int items_right_w = 0;
+
+    // split panel relativly
+    float items_right_rel = 0;
+
+	// split panel to always give righ col items enough space
+    bool items_right_fit = false;
 };
 
 std::string bytesPretty(size_t bytes) {
@@ -153,18 +164,28 @@ public:
         std::cout << panel.title;
         unCol();
 
+        int items_maxlength = panel.width;
+
+        // Calculte r items width
+        if (panel.items_right.size() > 0) {
+        	if (panel.items_right_w) {
+        		items_maxlength = panel.items_right_w;
+        	} else if (panel.items_right_rel) {
+        		items_maxlength = (float)panel.width * (1.0f - panel.items_right_rel);
+        	} else if (panel.items_right_fit) {
+        		int r_max_l = 0;
+        		for (std::string item: panel.items_right) {
+        			r_max_l = std::fmax(r_max_l, (int)item.length());
+        		}
+        		items_maxlength = panel.width - r_max_l;
+        	}
+        }
+
         // Draw items
         for (size_t i = 0; i < panel.items.size() && i < static_cast<size_t>(panel.height - 1); i++) {
 			int itemX = align(panel.startX, panel.width, panel.itemsPrefix.length() + panel.items[i].length(), panel.itemsAlign);
             moveCursor(itemX, panel.startY + 1 + i);
             std::cout << panel.itemsPrefix << panel.items[i];
-
-            // If there is a right-aligned item
-            if (!panel.items_right.empty() && i < panel.items_right.size()) {
-                int rightItemX = rightAlign(panel.startX, panel.width, panel.items_right[i].length());
-                moveCursor(rightItemX, panel.startY + 1 + i);
-                std::cout << panel.items_right[i];
-            }
         }
 	}
 
