@@ -152,6 +152,7 @@ public:
     void renderPanel(const listPanel& panel) {
         // Draw title
 		int titleX = align(panel.startX, panel.width, panel.title.length(), panel.titleAlign);
+        moveCursor(panel.startX, panel.startY);
 
         // Draw spaces before title
         if (panel.titleStyle == INVERTED || panel.titleStyle == HOLE) {
