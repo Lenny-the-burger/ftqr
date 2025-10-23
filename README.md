@@ -2,6 +2,8 @@
 
 File Tansfer Quick Response (ftqr) is a command-line tool that lets you share files between devices without the need of a physical connection or a cloud service. Connections are initially made over a public relay server, but all actual file transfers occur peer-to-peer over webRTC.
 
+<img width="960" height="496" alt="image" src="https://github.com/user-attachments/assets/88c689e3-1b2f-47bb-95d1-f94a3de3d4fc" />
+
 The ftqr host program should be cross compilable to most operating systems. The ftqr host program is a purely command line tool, so it can be run on a headless server or a machine over ssh without a issue.
 
 ## Usage
