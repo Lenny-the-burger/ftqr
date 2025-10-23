@@ -18,8 +18,7 @@ int main() {
 
 #pragma region QR code
 	string prefix = "www.ftqr.cc/";
-	// fake (for now) 4 random alphanumeric chars session id
-	string sessionId = "09rD";
+	string sessionId = makeNewSession();
 	string text = prefix + sessionId;
 
 	const QrCode qr = QrCode::encodeText(text.c_str(), QrCode::Ecc::LOW);

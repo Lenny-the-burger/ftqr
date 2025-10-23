@@ -126,9 +126,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ftqr.cpp" />
+    <ClCompile Include="networking.cpp" />
     <ClCompile Include="qrcodegen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="networking.h" />
     <ClInclude Include="qrcodegen.hpp" />
     <ClInclude Include="screenstuff.hpp" />
   </ItemGroup>

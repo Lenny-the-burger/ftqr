@@ -21,12 +21,18 @@
     <ClCompile Include="qrcodegen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="networking.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="qrcodegen.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="screenstuff.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="networking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
