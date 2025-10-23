@@ -3,13 +3,18 @@
 
 #include <iostream>
 #include <utility> // for std::pair
+#include <string>
 
 #ifdef _WIN32
 #include <windows.h>
+const int ORDER_SIZE = 1024; // on windows 1 KB is 1024 bytes
 #else
 #include <sys/ioctl.h>
 #include <unistd.h>
+const int ORDER_SIZE = 1000; // on unix-like systems 1 KB is 1000 bytes
 #endif
+
+using std::string;
 
 enum AlignMode {
     LEFT,
@@ -55,15 +60,15 @@ struct listPanel {
     int height;
 
     std::string title;
-    AlignMode titleAlign;
-    TitleStyle titleStyle;
+	AlignMode titleAlign = CENTER;
+	TitleStyle titleStyle = NORMAL;
 
     std::vector<std::string> items;
-    AlignMode itemsAlign;
-    std::string itemsPrefix;
+	AlignMode itemsAlign = LEFT;
+	std::string itemsPrefix = " ";
 
-    // Note that you may only have items_right if itemsAlign is LEFT
     std::vector<std::string> items_right;
+	AlignMode items_rightAlign = RIGHT;
 
 	// how wide is right pane (left items get truncated)
 
@@ -74,16 +79,16 @@ struct listPanel {
     float items_right_rel = 0;
 
 	// split panel to always give righ col items enough space
-    bool items_right_fit = false;
+    bool items_right_fit = true;
 };
 
 std::string bytesPretty(size_t bytes) {
     const char* sizes[] = { "B", "KB", "MB", "GB", "TB" };
     int order = 0;
     double dblBytes = static_cast<double>(bytes);
-    while (dblBytes >= 1024 && order < 4) {
+    while (dblBytes >= ORDER_SIZE && order < 4) {
         order++;
-        dblBytes = dblBytes / 1024;
+        dblBytes = dblBytes / ORDER_SIZE;
     }
     char buffer[20];
     snprintf(buffer, sizeof(buffer), "%.2f %s", dblBytes, sizes[order]);
@@ -164,28 +169,65 @@ public:
         std::cout << panel.title;
         unCol();
 
-        int items_maxlength = panel.width;
+        size_t items_maxlength = panel.width;
+		size_t right_items_maxlength = 0;
 
         // Calculte r items width
         if (panel.items_right.size() > 0) {
         	if (panel.items_right_w) {
-        		items_maxlength = panel.items_right_w;
+        		right_items_maxlength = panel.items_right_w;
+        		items_maxlength = panel.width - right_items_maxlength - 1; // -1 for gap
         	} else if (panel.items_right_rel) {
-        		items_maxlength = (float)panel.width * (1.0f - panel.items_right_rel);
+        		right_items_maxlength = (float)panel.width * panel.items_right_rel;
+        		items_maxlength = panel.width - right_items_maxlength - 1; // -1 for gap
         	} else if (panel.items_right_fit) {
-        		int r_max_l = 0;
+                right_items_maxlength = 0;
         		for (std::string item: panel.items_right) {
-        			r_max_l = std::fmax(r_max_l, (int)item.length());
+                    right_items_maxlength = max(right_items_maxlength, (size_t)item.length());
         		}
-        		items_maxlength = panel.width - r_max_l;
+        		items_maxlength = panel.width - right_items_maxlength - 1; // -1 for gap
         	}
         }
 
+        int right_startX = panel.startX + (int)items_maxlength + 1; // +1 for the gap space
+
         // Draw items
-        for (size_t i = 0; i < panel.items.size() && i < static_cast<size_t>(panel.height - 1); i++) {
-			int itemX = align(panel.startX, panel.width, panel.itemsPrefix.length() + panel.items[i].length(), panel.itemsAlign);
+        for (size_t i = 0; i < panel.items.size() && i < panel.height - 1; i++) {
+			string item = panel.items[i];
+
+			// Truncate item if too long
+            if (item.length() + panel.itemsPrefix.length() > items_maxlength) {
+				item = item.substr(0, items_maxlength - panel.itemsPrefix.length() - 3) + "...";
+            }
+
+			int itemX = align(panel.startX, items_maxlength, item.length() + panel.itemsPrefix.length(), panel.itemsAlign);
             moveCursor(itemX, panel.startY + 1 + i);
-            std::cout << panel.itemsPrefix << panel.items[i];
+            std::cout << panel.itemsPrefix << item;
+
+			// Draw right item if exists
+            if (panel.items_right.size() > i) {
+				string right_item = panel.items_right[i];
+				int right_itemX = align(right_startX, (int)right_items_maxlength, right_item.length(), panel.items_rightAlign);
+
+				// Calculate available space for right item within panel bounds
+				int panel_right_edge = panel.startX + panel.width;
+				int available_space = panel_right_edge - right_itemX;
+
+				// Truncate if item doesn't fit
+				if (available_space < (int)right_item.length()) {
+					if (panel.items_rightAlign == RIGHT) {
+						// For right-aligned items, cut from the left
+						int overflow = (int)right_item.length() - available_space;
+						right_item = right_item.substr(overflow);
+					} else {
+						// For left/center aligned, cut from the right
+						right_item = right_item.substr(0, available_space);
+					}
+				}
+
+				moveCursor(right_itemX, panel.startY + 1 + i);
+				std::cout << right_item;
+            }
         }
 	}
 
